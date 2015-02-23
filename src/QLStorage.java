@@ -1,10 +1,18 @@
+import java.awt.Window.Type;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
 public class QLStorage {
     
@@ -45,7 +53,9 @@ public class QLStorage {
         
         try (FileReader f = new FileReader(filepath))
         {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                            .registerTypeAdapter(Calendar.class, new CalendarDeserializer())
+                            .create();
             TasksWrapper wrapper = gson.fromJson(f, TasksWrapper.class);
             return wrapper.tasks;
         } catch (Exception e) {
@@ -59,12 +69,30 @@ public class QLStorage {
             TasksWrapper wrapper = new TasksWrapper();
             wrapper.tasks = tasks;
             Gson gson = new GsonBuilder()
-            .serializeNulls()
-            .setPrettyPrinting()
-            .create();
+                            .serializeNulls()
+                            .setPrettyPrinting()
+                            .create();
             gson.toJson(wrapper, f);
         } catch (Exception e) {
             throw new Error(String.format(ERROR_WRITE_FILE, filepath));
+        }
+    }
+    
+    private static class CalendarDeserializer implements JsonDeserializer<Calendar>
+    {
+        public Calendar deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
+                JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jobject = json.getAsJsonObject(); 
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(0);
+            c.set(jobject.get("year").getAsInt(), 
+                  jobject.get("month").getAsInt(), 
+                  jobject.get("dayOfMonth").getAsInt(), 
+                  jobject.get("hourOfDay").getAsInt(),
+                  jobject.get("minute").getAsInt(), 
+                  jobject.get("second").getAsInt());
+            c.get(Calendar.YEAR);
+            return c;
         }
     }
 }
