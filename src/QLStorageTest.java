@@ -3,13 +3,13 @@ import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class QLStorageTest {
     
     LinkedList<Task> tasks;
-
     
     @Before
     public void initialize() {
@@ -44,7 +44,7 @@ public class QLStorageTest {
     @Test
     public void test() {
         QLStorage.saveFile(tasks, "abc.txt");
-        LinkedList<Task> temp = QLStorage.loadFile("abc.txt");
+        LinkedList<Task> temp = QLStorage.loadFile(new LinkedList<Task>(), "abc.txt");
         
         assertEquals(tasks.toString(), temp.toString());
     }
