@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.LinkedList;
 
@@ -9,7 +10,9 @@ import org.junit.Test;
 
 public class QLStorageTest {
     
-    LinkedList<Task> tasks;
+    private LinkedList<Task> tasks;
+    
+    private String directory;
     
     @Before
     public void initialize() {
@@ -39,13 +42,43 @@ public class QLStorageTest {
         tasks.add(taskB);
         tasks.add(taskC);
         tasks.add(taskD);
+        QLStorage.saveFile(tasks, "abc.txt");
+        directory = "tempDirectory";
+        (new File(directory)).mkdir();
     }
     
     @Test
     public void test() {
-        QLStorage.saveFile(tasks, "abc.txt");
-        LinkedList<Task> temp = QLStorage.loadFile(new LinkedList<Task>(), "abc.txt");
-        
+        LinkedList<Task> temp = new LinkedList<Task>();
+        Error caught;
+        // This is to test valid input file
+        caught = null;
+        try {
+            temp = QLStorage.loadFile(new LinkedList<Task>(), "abc.txt");
+        } catch (Error e) {
+            caught = e;
+        }
+        assertEquals(null, caught);
         assertEquals(tasks.toString(), temp.toString());
+        
+        // This is to test another valid but non existence input file
+        caught = null;
+        try {
+            temp = QLStorage.loadFile(new LinkedList<Task>(), "hi");
+        } catch (Error e) {
+            caught = e;
+        }
+        assertEquals(null, caught);
+        assertEquals("[]", temp.toString());
+        
+        // This is to test invalid input file
+        caught = null;
+        try {
+            temp = QLStorage.loadFile(new LinkedList<Task>(), directory);
+        } catch (Error e) {
+            caught = e;
+        }
+        assertNotEquals(null, caught);
+        assertEquals(directory + " is a directory", caught.getMessage());
     }
 }

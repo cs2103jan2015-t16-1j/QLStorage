@@ -50,7 +50,6 @@ public class QLStorage {
         return true;
     }
     
-    //public static List<Task> loadFile(List<Task> taskList, String filePath) {
     public static <T extends List<Task>> T loadFile(T taskList, String filePath) {
         assert taskList != null;
         assert taskList.isEmpty();
